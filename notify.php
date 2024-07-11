@@ -63,21 +63,21 @@ if(isXml($rawdata) === FALSE){ //CREDIT CARD
 			switch ($response['TXN_STATUS']) {
 				case 'A':
 					$update = $wpdb->query("update ". $wpdb->prefix ."faspay_order set trx_id = '".$trxcc."', trx_id_cc = '".$response['TRANSACTIONID']."', date_trx = '".$datetrx."', total_amount = '".str_replace('.00', '', $response['AMOUNT'])."', channel = '500', payment_reff = '".$response['BANK_REFERENCE']."', status = '1' where order_id = '".$orderidcc."'");
-					$ordercc->update_status('wc-completed', __( 'Payment Success.', 'woocommerce' ));
+					$ordercc->update_status('wc-processing', __( 'Payment Processing.', 'woocommerce' ));
 					$ordercc->add_order_note(__('Your order #'.$response['MERCHANT_TRANID'].'is still on process, please contact your merchant for further assistance.', 'woocommerce'));
 					echo "Payment Processing";
 				break;
 
 				case 'CF':
-					$update = $wpdb->query("update ". $wpdb->prefix ."faspay_order set trx_id = '".$trxcc."', trx_id_cc = '".$response['TRANSACTIONID']."', date_trx = '".$datetrx."', total_amount = '".str_replace('.00', '', $response['AMOUNT'])."', channel = '500', payment_reff = '".$response['BANK_REFERENCE']."', status = '1' where order_id = '".$orderidcc."'");
-					$ordercc->update_status('wc-completed', __( 'Payment Success.', 'woocommerce' ));
-					$ordercc->add_order_note(__('Your order #'.$response['MERCHANT_TRANID'].'is still on process, please contact your merchant for further assistance.', 'woocommerce'));
-					echo "Payment Processing";
+					$update = $wpdb->query("update ". $wpdb->prefix ."faspay_order set trx_id = '".$trxcc."', trx_id_cc = '".$response['TRANSACTIONID']."', date_trx = '".$datetrx."', total_amount = '".str_replace('.00', '', $response['AMOUNT'])."', channel = '500', payment_reff = '".$response['BANK_REFERENCE']."', status = '3' where order_id = '".$orderidcc."'");
+					$ordercc->update_status('wc-failed', __( 'Payment Failed.', 'woocommerce' ));
+					$ordercc->add_order_note(__('Pembayaran tidak berhasil.', 'woocommerce'));
+					echo "Payment Failed";
 				break;
 
 				case 'P':
 					$update = $wpdb->query("update ". $wpdb->prefix ."faspay_order set trx_id = '".$trxcc."', trx_id_cc = '".$response['TRANSACTIONID']."', date_trx = '".$datetrx."', total_amount = '".str_replace('.00', '', $response['AMOUNT'])."', channel = '500', payment_reff = '".$response['BANK_REFERENCE']."', status = '1' where order_id = '".$orderidcc."'");
-					$ordercc->update_status('wc-completed', __( 'Payment Success.', 'woocommerce' ));
+					$ordercc->update_status('wc-processing', __( 'Payment Processing.', 'woocommerce' ));
 					$ordercc->add_order_note(__('Your order #'.$response['MERCHANT_TRANID'].'is still on process, please contact your merchant for further assistance.', 'woocommerce'));
 					echo "Payment Processing";
 				break;
@@ -105,9 +105,9 @@ if(isXml($rawdata) === FALSE){ //CREDIT CARD
 
 				case 'F':
 					$update = $wpdb->query("update ". $wpdb->prefix ."faspay_order set trx_id = '".$trxcc."', trx_id_cc = '".$response['TRANSACTIONID']."', date_trx = '".$datetrx."', total_amount = '".str_replace('.00', '', $response['AMOUNT'])."', channel = '500', payment_reff = '".$response['BANK_REFERENCE']."', status = '3' where order_id = '".$orderidcc."'");
-					$ordercc->update_status('wc-cancelled', __( 'Payment Void.', 'woocommerce' ));
+					$ordercc->update_status('wc-failed', __( 'Payment Void.', 'woocommerce' ));
 					$ordercc->add_order_note(__('Pembayaran tidak berhasil.', 'woocommerce'));
-					echo "Payment Void";
+					echo "Payment Failed";
 				break;
 			}
 
