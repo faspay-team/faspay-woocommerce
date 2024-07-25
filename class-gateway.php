@@ -84,19 +84,6 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $billgross      = 0;
         $billmiscfee    = $order->get_shipping_total();
         $additional_fee = $billmiscfee + $tax - $disc;
-
-        if($order->get_user_id() != 0 || $order->get_user_id() != NULL){
-            $userid = $order->get_user_id();
-        }else{
-            $userid = 1;
-        }
-
-        if($order->get_billing_phone() != NULL || $order->get_billing_phone() != ""){
-            $phone = $order->get_billing_phone();
-        }else{
-            $phone = "081234567890";
-        }
-
         $srv            = get_bloginfo('wpurl');
         $return_url     = $srv."/wp-content/plugins/faspay-woocommerce/thanks.php";
 
@@ -112,24 +99,24 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $post['bill_tax'] = $order->get_total_tax();
         $post['bill_gross'] = $order->get_subtotal();
         $post['bill_desc'] = "Pembelian di ".get_option('faspay_merchant_name');
-        $post['cust_name'] = $customer;
-        $post['cust_no'] = $userid;
+        $post['cust_name'] = ($customer) ? $customer : 'Faspay';
+        $post['cust_no'] = ($order->get_user_id()) ? $order->get_user_id() : '1';
         $post['return_url'] = $return_url;
-        $post['msisdn'] = $phone;
-        $post['email'] = $email;
-        $post['billing_address'] = $bill_adress;
-        $post['billing_address_city'] = $bill_city;
-        $post['billing_address_region'] = $bill_region;
-        $post['billing_address_state'] = $bill_state;
-        $post['billing_address_poscode'] = $bill_postcode;
-        $post['billing_address_country_code'] = $bill_state;
-        $post['receiver_name_for_shipping'] = $customer;
-        $post['shipping_address'] = $ship_address;
-        $post['shipping_address_city'] = $ship_city;
-        $post['shipping_address_region'] = $ship_region;
-        $post['shipping_address_state'] = $ship_state;
-        $post['shipping_address_poscode'] = $ship_postcode;
-        $post['shipping_address_country_code'] = $ship_state;
+        $post['msisdn'] = ($order->get_billing_phone()) ? $order->get_billing_phone() : '081234567890';
+        $post['email'] = ($email) ? $email : 'test@test.test';
+        $post['billing_address'] = ($bill_address) ? $bill_address : 'Jakarta';
+        $post['billing_address_city'] = ($bill_city) ? $bill_city : 'Jakarta';
+        $post['billing_address_region'] = ($bill_region) ? $bill_region : 'JK';
+        $post['billing_address_state'] = ($bill_state) ? $bill_state : 'ID';
+        $post['billing_address_poscode'] = ($bill_postcode) ? $bill_postcode : '12345';
+        $post['billing_address_country_code'] = ($bill_state) ? $bill_state : 'ID';
+        $post['receiver_name_for_shipping'] = ($customer) ? $customer : 'Faspay';
+        $post['shipping_address'] = ($ship_address) ? $ship_address : 'Jakarta';
+        $post['shipping_address_city'] = ($ship_city) ? $ship_city : 'Jakarta';
+        $post['shipping_address_region'] = ($ship_region) ? $ship_region : 'JK';
+        $post['shipping_address_state'] = ($ship_state) ? $ship_state : 'ID';
+        $post['shipping_address_poscode'] = ($ship_postcode) ? $ship_postcode : '12345';
+        $post['shipping_address_country_code'] = ($ship_state) ? $ship_state : 'ID';
         $post['signature'] = $signature;
 
         $no = 0;
