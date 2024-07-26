@@ -97,7 +97,7 @@ function requeryCapture($data,$server,$pass){
 
 function inquiryCapture($post,$server){
 	$url 	= $server == "1" ? "https://fpg.faspay.co.id/payment/api" : 
-	"https://fpgdev.faspay.co.id/payment/api";
+	"https://fpg-sandbox.faspay.co.id/payment/api";
 
 	foreach($post as $key => $value){
 		$post_items[] = $key . '=' . $value;
@@ -222,7 +222,7 @@ $icon_process 	= '<svg xmlns="http://www.w3.org/2000/svg" class="text-primary" w
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order #<?php echo $order->get_id(); ?></title>
+    <title>Order</title>
     <link href="<?= get_bloginfo('wpurl') ?>/wp-content/plugins/faspay-woocommerce/assets/bootstrap-5.2.0.min.css" rel="stylesheet">
 </head>
 
@@ -242,7 +242,7 @@ $icon_process 	= '<svg xmlns="http://www.w3.org/2000/svg" class="text-primary" w
 						
 						if ($getid[0]['payment_reff'] == '2') {
 							echo '<div class="mb-4 text-center">
-					                <?php echo $icon_success; ?>
+					                '.$icon_success.'
 					            </div>
 					            <div class="text-center">
 					                <h1>Thank You !</h1>
@@ -263,7 +263,7 @@ $icon_process 	= '<svg xmlns="http://www.w3.org/2000/svg" class="text-primary" w
 				
 					default:
 						echo '<div class="mb-4 text-center">
-				                <?php echo $icon_success; ?>
+				                '.$icon_success.'
 				            </div>
 				            <div class="text-center">
 				                <h1>Thank You !</h1>
@@ -286,8 +286,8 @@ $icon_process 	= '<svg xmlns="http://www.w3.org/2000/svg" class="text-primary" w
 				        '.$icon_failed.'
 				    </div>
 				    <div class="text-center">
-				        <h1>Info</h1>
-				        <p>Your payment for order #'.$order_id.' has been failed. Please order again.</p>
+				        <h1>Failed</h1>
+				        <p>Your payment order has been failed. Please order again.</p>
 				        <a href="'.home_url().'" class="btn btn-primary">Back Home</a>
 				    </div>';
 			}
