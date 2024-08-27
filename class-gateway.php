@@ -155,7 +155,6 @@ class Faspay_Gateway extends WC_Payment_Gateway {
 
         if($rst->response_code == "00"){
             // Mark the order as processed
-            $order->payment_complete();
 
             $insert_trx = $wpdb->query("insert into ". $wpdb->prefix ."faspay_postdata (order_id, date_trx, total_amount, post_data) values ('".$id."', '".$date."', '".$total."', '".$body."')");
             $insert_trx2 = $wpdb->query("insert into ". $wpdb->prefix ."faspay_order (order_id, date_trx, date_expire, total_amount, status) values ('".$id."', '".$date."', '".$expired."', '".$total."', '1')");

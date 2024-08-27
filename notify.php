@@ -57,13 +57,14 @@ if(isXml($rawdata) === FALSE){ //CREDIT CARD
 	$rwdatetrx 	= str_replace('%3A', ':', $response['TRANDATE']);
 	$datetrx1 	= str_replace('+', ' ', $rwdatetrx);
 	$datetrx 	= date('Y-m-d H:i:s',strtotime($datetrx1));
+	//print_r(sigcc($mid_mrc,$pass_mrc,$response['MERCHANT_TRANID'], $response['AMOUNT'], $response['TXN_STATUS']));exit;
 
 	if (isset($ordercc)){
 		if ($response['SIGNATURE'] == sigcc($mid_mrc,$pass_mrc,$response['MERCHANT_TRANID'], $response['AMOUNT'], $response['TXN_STATUS'])) {
 			switch ($response['TXN_STATUS']) {
 				case 'A':
 					$update = $wpdb->query("update ". $wpdb->prefix ."faspay_order set trx_id = '".$trxcc."', trx_id_cc = '".$response['TRANSACTIONID']."', date_trx = '".$datetrx."', total_amount = '".str_replace('.00', '', $response['AMOUNT'])."', channel = '500', payment_reff = '".$response['BANK_REFERENCE']."', status = '1' where order_id = '".$orderidcc."'");
-					$ordercc->update_status('wc-processing', __( 'Payment Processing.', 'woocommerce' ));
+					$ordercc->update_status('wc-pending', __( 'Payment Processing.', 'woocommerce' ));
 					$ordercc->add_order_note(__('Your order #'.$response['MERCHANT_TRANID'].'is still on process, please contact your merchant for further assistance.', 'woocommerce'));
 					echo "Payment Processing";
 				break;
@@ -77,21 +78,21 @@ if(isXml($rawdata) === FALSE){ //CREDIT CARD
 
 				case 'P':
 					$update = $wpdb->query("update ". $wpdb->prefix ."faspay_order set trx_id = '".$trxcc."', trx_id_cc = '".$response['TRANSACTIONID']."', date_trx = '".$datetrx."', total_amount = '".str_replace('.00', '', $response['AMOUNT'])."', channel = '500', payment_reff = '".$response['BANK_REFERENCE']."', status = '1' where order_id = '".$orderidcc."'");
-					$ordercc->update_status('wc-processing', __( 'Payment Processing.', 'woocommerce' ));
+					$ordercc->update_status('wc-pending', __( 'Payment Processing.', 'woocommerce' ));
 					$ordercc->add_order_note(__('Your order #'.$response['MERCHANT_TRANID'].'is still on process, please contact your merchant for further assistance.', 'woocommerce'));
 					echo "Payment Processing";
 				break;
 	
 				case 'C':
 					$update = $wpdb->query("update ". $wpdb->prefix ."faspay_order set trx_id = '".$trxcc."', trx_id_cc = '".$response['TRANSACTIONID']."', date_trx = '".$datetrx."', total_amount = '".str_replace('.00', '', $response['AMOUNT'])."', channel = '500', payment_reff = '".$response['BANK_REFERENCE']."', status = '2', date_payment = '".date('Y-m-d H:i:s')."' where order_id = '".$orderidcc."'");
-					$ordercc->update_status('wc-completed', __( 'Payment Success.', 'woocommerce' ));
+					$ordercc->update_status('wc-processing', __( 'Payment Success.', 'woocommerce' ));
 					$ordercc->add_order_note(__('Pembayaran telah dilakukan melalui creditcard melalui Faspay dengan id '.$response['MERCHANT_TRANID']. '. Status: Success('.$response['TXN_STATUS'].')', 'woocommerce'));
 					echo "Payment Success";
 				break;
 
 				case 'S':
 					$update = $wpdb->query("update ". $wpdb->prefix ."faspay_order set trx_id = '".$trxcc."', trx_id_cc = '".$response['TRANSACTIONID']."', date_trx = '".$datetrx."', total_amount = '".str_replace('.00', '', $response['AMOUNT'])."', channel = '500', payment_reff = '".$response['BANK_REFERENCE']."', status = '2', date_payment = '".date('Y-m-d H:i:s')."' where order_id = '".$orderidcc."'");
-					$ordercc->update_status('wc-completed', __( 'Payment Success.', 'woocommerce' ));
+					$ordercc->update_status('wc-processing', __( 'Payment Success.', 'woocommerce' ));
 					$ordercc->add_order_note(__('Pembayaran telah dilakukan melalui creditcard melalui Faspay dengan id '.$response['MERCHANT_TRANID']. '. Status: Success('.$response['TXN_STATUS'].')', 'woocommerce'));
 					echo "Payment Success";
 				break;
@@ -169,7 +170,7 @@ if(isXml($rawdata) === FALSE){ //CREDIT CARD
 			case '2':
 				if ($sig == $attr['signature']) {
 					$order->add_order_note(__('Pembayaran telah dilakukan melalui faspay dengan id '.$orderid. ' dan trxid '.$trxid .' pada tanggal '.$paymentdate.'.', 'woocommerce'));
-					$order->update_status('wc-completed', __( 'Payment Success.', 'woocommerce' ));
+					$order->update_status('wc-processing', __( 'Payment Success.', 'woocommerce' ));
 					$updatefp = $wpdb->query("update ". $wpdb->prefix ."faspay_order SET trx_id = '".$trxid."', status = '2', payment_reff = '".$attr['payment_reff']."', channel = '".$attr['payment_channel_uid']."', date_payment = '".$paymentdate."' WHERE order_id = '".$orderid."'");
 					$xml ="<faspay>";
 				   	$xml.="<response>Payment Notification</response>";
