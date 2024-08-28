@@ -33,7 +33,7 @@ class Faspay_Gateway extends WC_Payment_Gateway {
 
     // View payment
     public function payment_fields() {
-        
+        echo '<img src="'.get_bloginfo('wpurl').'/wp-content/plugins/faspay-woocommerce/assets/img/paywithfaspay.png">';
     }
   
     // Process the payment
@@ -119,15 +119,37 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $post['shipping_address_country_code'] = ($ship_state) ? $ship_state : 'ID';
         $post['signature'] = $signature;
 
-        $no = 0;
+        //$no     = 0;
+        $total  = 0;
         foreach ( $order->get_items() as $item ) {
-            $no ++;
+            //$no ++;
+            $total += $item->get_subtotal();
+
             //$billgross += ($item->get_subtotal() / $item->get_quantity()) - $disc;
-            $post['item'][$no]['product']    = $this->clean($item->get_name());
-            $post['item'][$no]['qty']        = $item->get_quantity();
-            $post['item'][$no]['amount']     = $item->get_subtotal() / $item->get_quantity();
+            //$post['item'][$no]['product']    = $this->clean($item->get_name());
+            //$post['item'][$no]['qty']        = $item->get_quantity();
+            //$post['item'][$no]['amount']     = $item->get_subtotal() / $item->get_quantity();
         }
 
+        $grandtotal = $total;
+
+        if($disc > 0){
+            $grandtotal = $grandtotal - $disc;
+        }
+
+        if($billmiscfee > 0){
+            $grandtotal = $grandtotal + $billmiscfee;
+        }
+
+        if($tax > 0){
+            $grandtotal = $grandtotal + $tax;
+        }
+
+        $post['item'][1]['product']  = "Checkout from ".get_option('faspay_merchant_name');
+        $post['item'][1]['qty']      = "1";
+        $post['item'][1]['amount']   = $grandtotal;
+
+        /*
         if($billmiscfee > 0){
             $ship_no                            = $no + 1;
             $post['item'][$ship_no]['product']  = "Shipping Fee";
@@ -141,16 +163,12 @@ class Faspay_Gateway extends WC_Payment_Gateway {
             $post['item'][$tax_no]['qty']       = "1";
             $post['item'][$tax_no]['amount']    = $tax;
         }
-
-        if($disc > 0){
-            $disc_no                            = $no + 3;
-            $post['item'][$disc_no]['product']  = "Discount";
-            $post['item'][$disc_no]['qty']      = "1";
-            $post['item'][$disc_no]['amount']   = "-".$disc;
-        }
+        */
         
         $body       = json_encode($post);
+        //print_r($body);exit;
         $response   = $this->curl($url, $body);
+        //print_r($response);exit;
         $rst        = json_decode($response);
 
         if($rst->response_code == "00"){
