@@ -94,7 +94,7 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $post['bill_reff'] = $key;
         $post['bill_date'] = $date;
         $post['bill_expired'] = $expired;
-        $post['bill_miscfee'] = $billmiscfee;
+        $post['bill_miscfee'] = 0;
         $post['bill_total'] = $total;
         $post['bill_tax'] = $order->get_total_tax();
         $post['bill_gross'] = $order->get_subtotal();
