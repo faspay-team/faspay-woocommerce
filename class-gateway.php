@@ -145,9 +145,9 @@ class Faspay_Gateway extends WC_Payment_Gateway {
             $grandtotal = $grandtotal + $tax;
         }
 
-        $post['item'][1]['product']  = "Checkout from ".get_option('faspay_merchant_name');
-        $post['item'][1]['qty']      = "1";
-        $post['item'][1]['amount']   = $grandtotal;
+        $post['item'][0]['product']  = "Checkout from ".get_option('faspay_merchant_name');
+        $post['item'][0]['qty']      = "1";
+        $post['item'][0]['amount']   = $grandtotal;
 
         /*
         if($billmiscfee > 0){
