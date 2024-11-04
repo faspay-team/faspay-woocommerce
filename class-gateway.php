@@ -100,7 +100,7 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $post['bill_gross'] = $order->get_subtotal();
         $post['bill_desc'] = "Pembelian di ".get_option('faspay_merchant_name');
         $post['cust_name'] = ($customer) ? $customer : 'Faspay';
-        $post['cust_no'] = ($order->get_user_id()) ? $order->get_user_id() : '1';
+        $post['cust_no'] = 'woocommerce';
         $post['return_url'] = $return_url;
         $post['msisdn'] = ($order->get_billing_phone()) ? $order->get_billing_phone() : '081234567890';
         $post['email'] = ($email) ? $email : 'test@test.test';
@@ -166,9 +166,7 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         */
         
         $body       = json_encode($post);
-        //print_r($body);exit;
         $response   = $this->curl($url, $body);
-        //print_r($response);exit;
         $rst        = json_decode($response);
 
         if($rst->response_code == "00"){
