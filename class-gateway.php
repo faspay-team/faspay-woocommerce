@@ -67,9 +67,11 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $ship_postcode  = $this->clean($order->get_shipping_postcode());
       
         // Implement your payment processing logic here
-        if (get_option('faspay_merchant_env') == '1') { //production
+        if (get_option('faspay_merchant_env') == '1') {
+            //production
             $url        = "https://xpress.faspay.co.id/v4/post";            
-        }else{ //sandbox
+        }else{
+            //sandbox
             $url        = "https://xpress-sandbox.faspay.co.id/v4/post";
         }
 
@@ -80,12 +82,12 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $signature      = sha1(md5("bot".$boi.$password.$id.$total));
         $expired        = date('Y-m-d H:i:s', strtotime('+'.get_option('faspay_merchant_expired').' hours'));
         $tax            = $order->get_total_tax();
+        $shipping       = $order->get_shipping_total();
         $disc           = $order->get_total_discount();
         $billgross      = 0;
-        $billmiscfee    = $order->get_shipping_total();
-        $additional_fee = $billmiscfee + $tax - $disc;
+        $billmiscfee    = $shipping + $tax - $disc;
         $srv            = get_bloginfo('wpurl');
-        $return_url     = $srv."/wp-content/plugins/faspay-woocommerce/thanks.php";
+        $return_url     = $srv."/checkout/order-received/";
 
         $post = array();
         $post['merchant_id'] = $boi;
@@ -94,12 +96,16 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $post['bill_reff'] = $key;
         $post['bill_date'] = $date;
         $post['bill_expired'] = $expired;
-        $post['bill_miscfee'] = 0;
+        $post['bill_miscfee'] = "0";
         $post['bill_total'] = $total;
         $post['bill_tax'] = $order->get_total_tax();
         $post['bill_gross'] = $order->get_subtotal();
         $post['bill_desc'] = "Pembelian di ".get_option('faspay_merchant_name');
-        $post['cust_name'] = ($customer) ? $customer : 'Faspay';
+        if($customer == '' || $customer == ' '){
+            $post['cust_name'] = 'Faspay';
+        }else{
+            $post['cust_name'] = $customer;
+        }
         $post['cust_no'] = 'woocommerce';
         $post['return_url'] = $return_url;
         $post['msisdn'] = ($order->get_billing_phone()) ? $order->get_billing_phone() : '081234567890';
@@ -119,52 +125,10 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $post['shipping_address_country_code'] = ($ship_state) ? $ship_state : 'ID';
         $post['signature'] = $signature;
 
-        //$no     = 0;
-        $total  = 0;
-        foreach ( $order->get_items() as $item ) {
-            //$no ++;
-            $total += $item->get_subtotal();
+        $post['item'][1]['product']  = "Checkout from ".get_option('faspay_merchant_name');
+        $post['item'][1]['qty']      = "1";
+        $post['item'][1]['amount']   = $order->get_total();
 
-            //$billgross += ($item->get_subtotal() / $item->get_quantity()) - $disc;
-            //$post['item'][$no]['product']    = $this->clean($item->get_name());
-            //$post['item'][$no]['qty']        = $item->get_quantity();
-            //$post['item'][$no]['amount']     = $item->get_subtotal() / $item->get_quantity();
-        }
-
-        $grandtotal = $total;
-
-        if($disc > 0){
-            $grandtotal = $grandtotal - $disc;
-        }
-
-        if($billmiscfee > 0){
-            $grandtotal = $grandtotal + $billmiscfee;
-        }
-
-        if($tax > 0){
-            $grandtotal = $grandtotal + $tax;
-        }
-
-        $post['item'][0]['product']  = "Checkout from ".get_option('faspay_merchant_name');
-        $post['item'][0]['qty']      = "1";
-        $post['item'][0]['amount']   = $grandtotal;
-
-        /*
-        if($billmiscfee > 0){
-            $ship_no                            = $no + 1;
-            $post['item'][$ship_no]['product']  = "Shipping Fee";
-            $post['item'][$ship_no]['qty']      = "1";
-            $post['item'][$ship_no]['amount']   = $billmiscfee;
-        }
-
-        if($tax > 0){
-            $tax_no                             = $no + 2;
-            $post['item'][$tax_no]['product']   = "Tax Fee";
-            $post['item'][$tax_no]['qty']       = "1";
-            $post['item'][$tax_no]['amount']    = $tax;
-        }
-        */
-        
         $body       = json_encode($post);
         $response   = $this->curl($url, $body);
         $rst        = json_decode($response);
@@ -183,9 +147,14 @@ class Faspay_Gateway extends WC_Payment_Gateway {
                 'result'   => 'success',
                 'redirect' => $rst->redirect_url,
             );
+        }else{
+            $errors['message'] = "<p>".$rst->response_desc."</p>";
+            echo json_encode($errors);
+            http_response_code(500);
+            exit;
         }
     }
-
+    
     public function curl($url, $body){
         $c = curl_init ($url);
         curl_setopt ($c, CURLOPT_POST, true);
