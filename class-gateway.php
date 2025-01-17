@@ -136,9 +136,39 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         if($rst->response_code == "00"){
             // Mark the order as processed
 
-            $insert_trx = $wpdb->query("insert into ". $wpdb->prefix ."faspay_postdata (order_id, date_trx, total_amount, post_data) values ('".$id."', '".$date."', '".$total."', '".$body."')");
-            $insert_trx2 = $wpdb->query("insert into ". $wpdb->prefix ."faspay_order (order_id, date_trx, date_expire, total_amount, status) values ('".$id."', '".$date."', '".$expired."', '".$total."', '1')");
-            $insert_trx3 = $wpdb->query("insert into ". $wpdb->prefix ."faspay_post (order_id, date_trx, total_amount, post_data) values ('$id', '".$date."', '".$total."', '".$body."')");
+            // Prepared statement untuk faspay_postdata
+            $insert_trx = $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO {$wpdb->prefix}faspay_postdata (order_id, date_trx, total_amount, post_data) VALUES (%s, %s, %s, %s)",
+                    $id,
+                    $date,
+                    $total,
+                    $body
+                )
+            );
+
+            // Prepared statement untuk faspay_order
+            $insert_trx2 = $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO {$wpdb->prefix}faspay_order (order_id, date_trx, date_expire, total_amount, status) VALUES (%s, %s, %s, %s, %s)",
+                    $id,
+                    $date,
+                    $expired,
+                    $total,
+                    '1'
+                )
+            );
+
+            // Prepared statement untuk faspay_post
+            $insert_trx3 = $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO {$wpdb->prefix}faspay_post (order_id, date_trx, total_amount, post_data) VALUES (%s, %s, %s, %s)",
+                    $id,
+                    $date,
+                    $total,
+                    $body
+                )
+            );
 
             $redirect_success = $this->get_return_url( $order );
 
@@ -161,7 +191,7 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         curl_setopt ($c, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
         curl_setopt ($c, CURLOPT_POSTFIELDS, $body);
         curl_setopt ($c, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt ($c, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt ($c, CURLOPT_SSL_VERIFYPEER, true);
         $rst = curl_exec ($c);
         curl_close ($c);
 
