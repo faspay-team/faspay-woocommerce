@@ -686,10 +686,27 @@ function inquiryCapture($post,$server){
 	curl_setopt($ch, CURLOPT_HEADER, 0);
 	curl_setopt($ch, CURLOPT_POST, true);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+
 	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+	// Ambil string SSL dari pengaturan
+	$ssl_string = get_option('faspay_ssl_string');
+	if ($ssl_string) {
+		// Simpan string SSL ke file sementara
+		$temp_file = sys_get_temp_dir() . '/faspay_cert.pem';
+		file_put_contents($temp_file, $ssl_string);
+
+		// Gunakan file sementara sebagai sertifikat CA
+		curl_setopt($ch, CURLOPT_CAINFO, $temp_file);
+	} else {
+		error_log('SSL string is empty or invalid.');
+	}
+
+
+
 	$result	= curl_exec($ch);
 	curl_close($ch);
 	$lines	= explode(';',$result);
@@ -752,10 +769,25 @@ function autoThings($transId,$orderId,$stat){
 	curl_setopt($ch, CURLOPT_HEADER, 0);
 	curl_setopt($ch, CURLOPT_POST, true);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
+
 	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+	// Ambil string SSL dari pengaturan
+	$ssl_string = get_option('faspay_ssl_string');
+	if ($ssl_string) {
+		// Simpan string SSL ke file sementara
+		$temp_file = sys_get_temp_dir() . '/faspay_cert.pem';
+		file_put_contents($temp_file, $ssl_string);
+
+		// Gunakan file sementara sebagai sertifikat CA
+		curl_setopt($ch, CURLOPT_CAINFO, $temp_file);
+	} else {
+		error_log('SSL string is empty or invalid.');
+	}
+
 	$result = curl_exec($ch);
 	curl_close($ch);
 	$array = explode(";", $result);
