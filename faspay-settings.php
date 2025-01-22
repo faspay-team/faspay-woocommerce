@@ -85,6 +85,19 @@ class Faspay_Settings {
 				),
 				'default' => '0'
 			),
+			array(
+			    'title' => __('Certificate Public Key SSL Faspay', 'wc_faspay'),
+				'id' => self::$option_prefix . '_ssl_string',
+				'type' => 'textarea',  // Ganti menjadi textarea
+				'default' => '',
+				'class' => 'large-text',
+				'custom_attributes' => array(
+					'rows' => 10,  // Tentukan tinggi textarea
+					'cols' => 50,  // Tentukan lebar textarea
+				),
+				'desc_tip' => false, // Nonaktifkan tooltip
+				'desc' => '<p class="description">' . __('Copy Certificate Public Key SSL Faspay di sini.', 'wc-faspay') . '</p>',
+			),
 		));
 		return apply_filters('woocommerce_' . self::$tab_name, $settings);
 	}

@@ -136,9 +136,39 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         if($rst->response_code == "00"){
             // Mark the order as processed
 
-            $insert_trx = $wpdb->query("insert into ". $wpdb->prefix ."faspay_postdata (order_id, date_trx, total_amount, post_data) values ('".$id."', '".$date."', '".$total."', '".$body."')");
-            $insert_trx2 = $wpdb->query("insert into ". $wpdb->prefix ."faspay_order (order_id, date_trx, date_expire, total_amount, status) values ('".$id."', '".$date."', '".$expired."', '".$total."', '1')");
-            $insert_trx3 = $wpdb->query("insert into ". $wpdb->prefix ."faspay_post (order_id, date_trx, total_amount, post_data) values ('$id', '".$date."', '".$total."', '".$body."')");
+            // Prepared statement untuk faspay_postdata
+            $insert_trx = $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO {$wpdb->prefix}faspay_postdata (order_id, date_trx, total_amount, post_data) VALUES (%s, %s, %s, %s)",
+                    $id,
+                    $date,
+                    $total,
+                    $body
+                )
+            );
+
+            // Prepared statement untuk faspay_order
+            $insert_trx2 = $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO {$wpdb->prefix}faspay_order (order_id, date_trx, date_expire, total_amount, status) VALUES (%s, %s, %s, %s, %s)",
+                    $id,
+                    $date,
+                    $expired,
+                    $total,
+                    '1'
+                )
+            );
+
+            // Prepared statement untuk faspay_post
+            $insert_trx3 = $wpdb->query(
+                $wpdb->prepare(
+                    "INSERT INTO {$wpdb->prefix}faspay_post (order_id, date_trx, total_amount, post_data) VALUES (%s, %s, %s, %s)",
+                    $id,
+                    $date,
+                    $total,
+                    $body
+                )
+            );
 
             $redirect_success = $this->get_return_url( $order );
 
@@ -155,18 +185,50 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         }
     }
     
-    public function curl($url, $body){
-        $c = curl_init ($url);
-        curl_setopt ($c, CURLOPT_POST, true);
-        curl_setopt ($c, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
-        curl_setopt ($c, CURLOPT_POSTFIELDS, $body);
-        curl_setopt ($c, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt ($c, CURLOPT_SSL_VERIFYPEER, false);
-        $rst = curl_exec ($c);
-        curl_close ($c);
+    // public function curl($url, $body){
+    //     $c = curl_init ($url);
+    //     curl_setopt ($c, CURLOPT_POST, true);
+    //     curl_setopt ($c, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
+    //     curl_setopt ($c, CURLOPT_POSTFIELDS, $body);
+    //     curl_setopt ($c, CURLOPT_RETURNTRANSFER, true);
+    //     curl_setopt($c, CURLOPT_SSL_VERIFYPEER, true);
+    //     curl_setopt($c, CURLOPT_CAINFO, __DIR__ . '/faspay.crt');
+    //     $rst = curl_exec ($c);
+    //     curl_close ($c);
 
+    //     return $rst;
+    // }
+
+    public function curl($url, $body) {
+        $c = curl_init($url);
+        curl_setopt($c, CURLOPT_POST, true);
+        curl_setopt($c, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
+        curl_setopt($c, CURLOPT_POSTFIELDS, $body);
+        curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+
+        curl_setopt($c, CURLOPT_SSL_VERIFYPEER, true);
+        // Ambil string SSL dari pengaturan
+        $ssl_string = get_option('faspay_ssl_string');
+        if ($ssl_string) {
+            // Simpan string SSL ke file sementara
+            $temp_file = sys_get_temp_dir() . '/faspay_cert.pem';
+            file_put_contents($temp_file, $ssl_string);
+    
+            // Gunakan file sementara sebagai sertifikat CA
+            curl_setopt($c, CURLOPT_CAINFO, $temp_file);
+        } else {
+            error_log('SSL string is empty or invalid.');
+        }
+    
+        $rst = curl_exec($c);
+    
+        error_log('Data Response: ' . print_r($rst, true));
+    
+        curl_close($c);
+    
         return $rst;
     }
+
 
     public function clean($string) {
        return preg_replace('/[^A-Za-z0-9\-]/', ' ', $string); // Removes special chars.
