@@ -125,9 +125,9 @@ class Faspay_Gateway extends WC_Payment_Gateway {
         $post['shipping_address_country_code'] = ($ship_state) ? $ship_state : 'ID';
         $post['signature'] = $signature;
 
-        $post['item'][1]['product']  = "Checkout from ".get_option('faspay_merchant_name');
-        $post['item'][1]['qty']      = "1";
-        $post['item'][1]['amount']   = $order->get_total();
+        $item = ["product" => "Checkout from ".get_option('faspay_merchant_name'), "qty" => "1", "amount" => $order->get_total()];
+
+        $post['item'][] = $item;
 
         $body       = json_encode($post);
         $response   = $this->curl($url, $body);
