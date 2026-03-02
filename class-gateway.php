@@ -141,7 +141,7 @@ class Faspay_Gateway extends WC_Payment_Gateway {
          }
 
         if($rst->response_code == "00"){
-            $rst->redirect_url = null;
+       
             if(!$rst->redirect_url){
                 wc_clear_notices();
                 wc_add_notice('An error occurred while processing your request', 'notice');
